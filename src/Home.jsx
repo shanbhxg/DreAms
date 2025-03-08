@@ -19,8 +19,10 @@ function App() {
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); 
 
-  const current_location = window.location.href; 
-  const URL = current_location[-5];
+
+  // if local
+  // const URL = 'http://localhost:8080';
+  const URL = 'https://dre-am.vercel.app';
 
   useEffect(() => {
     if (isNightMode) {
