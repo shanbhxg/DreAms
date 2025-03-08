@@ -11,8 +11,8 @@ function App() {
 
   const [dreams, setDreams] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [userAge, setUserAge] = useState('20');
-  const [userGender, setUserGender] = useState('female');
+  const [userAge, setUserAge] = useState('');
+  const [userGender, setUserGender] = useState('');
 
   const [selectedDream, setSelectedDream] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
