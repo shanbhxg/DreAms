@@ -64,11 +64,11 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
 
 # Local checks
-def run():
-    server_address = ("", 8080)
-    httpd = HTTPServer(server_address, Handler)
-    #print("Starting server on http://localhost:8080")
-    httpd.serve_forever()
+# def run():
+#     server_address = ("", 8080)
+#     httpd = HTTPServer(server_address, Handler)
+#     #print("Starting server on http://localhost:8080")
+#     httpd.serve_forever()
 
-if __name__ == "__main__":
-    run()
+# if __name__ == "__main__":
+#     run()

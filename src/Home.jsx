@@ -19,6 +19,11 @@ function App() {
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); 
 
+
+  // if local
+  // const URL = 'http://localhost:8080';
+  const URL = 'https://dre-am.vercel.app';
+
   useEffect(() => {
     if (isNightMode) {
       document.body.classList.add('night-mode');
@@ -39,7 +44,8 @@ function App() {
     if (userInput.trim() === '') return;
     setIsLoading(true); 
     try {
-      const response = await fetch('http://localhost:8080/generate_llm_response', {
+
+      const response = await fetch(URL + '/generate_llm_response', {        
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
