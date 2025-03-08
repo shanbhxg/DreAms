@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap');
+
+:root {
+  /* light should be like sunrise */
+  --bg-light: linear-gradient(to bottom, #fbd9c2, #a7a6ee);
+  --bg-dark: linear-gradient(to bottom, #1d2671, #c33764);
+  --text-light: #333;
+  --text-dark: #fff;
+  --container-bg-light: rgba(255, 255, 255, 0.8);
+  --container-bg-dark: rgba(0, 0, 0, 0.4);
+  --accent-day: rgba(126, 87, 133, 0.678);
+  --accent-night: #000;
+  --active-dream-light: #ddd;
+  --active-dream-dark: #333;
+}
+
+body {
+  font-family: 'Quicksand', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  transition: background 0.5s ease-in-out;
+  background: var(--bg-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body.night-mode {
+  background: var(--bg-dark);
+}
+
+body.night-mode::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(white 1px, transparent 1px),
+    radial-gradient(white 1px, transparent 1px),
+    radial-gradient(white 1px, transparent 1px);
+  background-size: 3px 3px, 2px 2px, 1px 1px;
+  background-position: 0 0, 50px 50px, 100px 100px;
+  opacity: 0.3;
+}
+
+.app-container {
+  display: flex;
+  width: 90%;
+  max-width: 1100px;
+  background: var(--container-bg-light);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: background 0.5s ease-in-out;
+}
+
+body.night-mode .app-container {
+  background: var(--container-bg-dark);
+}
+
+.sidebar {
+  width: 30%;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px 0 0 20px;
+  transition: background 0.5s ease-in-out;
+}
+
+body.night-mode .sidebar {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+  color: var(--accent-day);
+}
+
+body.night-mode .sidebar h2 {
+  color: var(--text-dark);
+}
+
+.history-card {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 12px;
+  border-radius: 10px;
+  text-align: left;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+body.night-mode .history-card {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dark);
+}
+
+.history-card:hover {
+  transform: scale(1.05);
+}
+
+.history-card.active {
+  background-color: var(--active-dream-light);
+  border-left: 5px solid var(--accent-day);
+}
+
+body.night-mode .history-card.active {
+  background-color: var(--active-dream-dark);
+  border-left: 5px solid var(--accent-day);
+}
+
+.main-content {
+  padding: 30px;
+  text-align: center;
+  color: var(--text-light);
+  transition: color 0.5s ease-in-out;
+}
+
+body.night-mode .main-content {
+  color: var(--text-dark);
+}
+
+.user-welcome {
+  font-size: 2rem;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+textarea {
+  width: 100%;
+  height: 120px;
+  padding: 15px;
+  font-size: 1rem;
+  border-radius: 15px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.night-mode textarea {
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-dark);
+}
+
+button {
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+}
+
+body.night-mode button {
+  background: var(--accent-night);
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.generate-btn {
+  background: var(--accent-day);
+  position: relative;
+}
+
+.generate-btn:after {
+  content: '🔥';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+
+button {
+  background: var(--accent-day);
+}
+
+.dream-display {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+  text-align: left;
+  transition: background 0.5s ease-in-out;
+}
+
+body.night-mode .dream-display {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dream-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.analysis-text {
+  font-size: 1.2rem;
+  font-style: italic;
+  padding: 15px;
+  border-left: 5px solid var(--accent-day);
+  border-radius: 10px;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+body.night-mode .analysis-text {
+  border-left: 5px solid var(--accent-night);
+}
+
+.theme-toggle-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--accent-day);
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.prompt-toggle-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--accent-day);
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.prompt-toggle-btn:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: 15px;
+  left: 110px;
+  transform: translateX(-50%);
+  background-color: var(--accent-day);
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-family: 'Quicksand', sans-serif;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+  transition-delay: 0.3s;
+}
+
+body.night-mode .prompt-toggle-btn:hover::after {
+  content: attr(title);
+  background: var(--accent-night);
+}
+
+.prompt-toggle-btn::after {
+  content: "";
+  visibility: hidden;
+  opacity: 0;
+}
+
+.theme-toggle-btn, .prompt-toggle-btn {
+  font-size: 2rem;
+}

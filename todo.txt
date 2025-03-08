@@ -1,0 +1,6 @@
+delete
+DONE angel/devil mode 
+user input/llm output mode
+edit mode - later
+DONE css make normal please - active one in history
+login/register button
