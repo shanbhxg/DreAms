@@ -22,7 +22,7 @@ function App() {
 
   // if local
   // const URL = 'http://localhost:8080';
-  const URL = 'https://dre-am.vercel.app';
+  const URL = 'https://dre-ams.vercel.app';
 
   useEffect(() => {
     if (isNightMode) {
