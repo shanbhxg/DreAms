@@ -19,6 +19,8 @@ function App() {
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); 
 
+  const current_location = window.location.href;
+
   useEffect(() => {
     if (isNightMode) {
       document.body.classList.add('night-mode');
@@ -39,7 +41,8 @@ function App() {
     if (userInput.trim() === '') return;
     setIsLoading(true); 
     try {
-      const response = await fetch('http://localhost:8080/generate_llm_response', {
+
+      const response = await fetch(current_location + '/generate_llm_response', {        
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
