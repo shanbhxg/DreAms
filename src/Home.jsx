@@ -45,7 +45,7 @@ function App() {
     setIsLoading(true); 
     try {
 
-      const response = await fetch(URL + '/generate_llm_response', {        
+      const response = await fetch(URL + '/api/generate_llm_response', {        
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

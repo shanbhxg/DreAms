@@ -15,7 +15,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        if self.path == "/generate_llm_response":
+        if self.path == "/api/generate_llm_response":
 
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
