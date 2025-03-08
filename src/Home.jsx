@@ -19,7 +19,8 @@ function App() {
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); 
 
-  const current_location = window.location.href;
+  const current_location = window.location.href; 
+  const URL = current_location[-5];
 
   useEffect(() => {
     if (isNightMode) {
@@ -42,7 +43,7 @@ function App() {
     setIsLoading(true); 
     try {
 
-      const response = await fetch(current_location + '/generate_llm_response', {        
+      const response = await fetch(URL + '/generate_llm_response', {        
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
