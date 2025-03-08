@@ -25,8 +25,8 @@ class LLMResponse:
             full_prompt = nice_predefined_prompt.format(user_input, gender, age)
 
         response = self.model.generate_content(full_prompt)
-        print(response.text)
-        print("response from gemini.py", type(response.text))
+        #print(response.text)
+        #print("response from gemini.py", type(response.text))
 
         utility_obj = Utility()
         response_arr = utility_obj.split_string(response.text)

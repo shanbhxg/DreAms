@@ -4,3 +4,16 @@ user input/llm output mode
 edit mode - later
 DONE css make normal please - active one in history
 login/register button
+
+
+devil mode : isDevilModel : boolean; 
+user age : string; 
+user input : string;    
+user gender : string;
+
+output will be a json array (gotta use response.json())
+export button
+
+
+
+path : /generate_llm_response

@@ -1,16 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap');
 
 :root {
-  /* light should be like sunrise */
   --bg-light: linear-gradient(to bottom, #fbd9c2, #a7a6ee);
   --bg-dark: linear-gradient(to bottom, #1d2671, #c33764);
   --text-light: #333;
   --text-dark: #fff;
-  --container-bg-light: rgba(255, 255, 255, 0.8);
+  --container-bg-light: rgba(255, 255, 255, 0.4);
   --container-bg-dark: rgba(0, 0, 0, 0.4);
   --accent-day: rgba(126, 87, 133, 0.678);
   --accent-night: #000;
-  --active-dream-light: #ddd;
+  --active-dream-light: #;
   --active-dream-dark: #333;
 }
 
@@ -50,8 +49,11 @@ body.night-mode::after {
 
 .app-container {
   display: flex;
-  width: 90%;
-  max-width: 1100px;
+  width: 90vw;
+  height: 80vh;
+  margin-top: 100px;
+  margin-bottom: 10px;
+  margin-right: 50px;
   background: var(--container-bg-light);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -64,10 +66,32 @@ body.night-mode .app-container {
   background: var(--container-bg-dark);
 }
 
+
+h4 {
+  margin: 0;
+  color: var(--text-light);
+}
+
+/* neon username display */
+.username-display {
+  text-align: center;
+  color: var(--accent-day);
+  text-decoration: underline var(--container-bg-dark);
+  font-size: 1.5rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+body.night-mode .username-display {
+  color: var(--accent-night);
+  text-decoration: underline var(--container-bg-light); 
+}
+
 .sidebar {
-  width: 30%;
+  width: 75%;
   padding: 20px;
   text-align: center;
+  color: var(--accent-day);
   background: rgba(255, 255, 255, 0.6);
   border-radius: 20px 0 0 20px;
   transition: background 0.5s ease-in-out;
@@ -75,6 +99,7 @@ body.night-mode .app-container {
 
 body.night-mode .sidebar {
   background: rgba(0, 0, 0, 0.3);
+  color: var(--text-dark);
 }
 
 .sidebar h2 {
@@ -137,8 +162,31 @@ body.night-mode .main-content {
 .input-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin: 20px 0;
+  align-items: center;
+  margin: 10px;
+  width: 55vw;
+}
+
+.input-container button {
+  margin-top: 20px;
+  width: 103%;
+  border-radius: 10px;
+  transform: none !important;
+}
+
+.new-dream-btn {
+  position: absolute;
+  top: 7vh;
+  left: 32%;
+  background: var(--accent-day);
+  color: white;
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
 textarea {
@@ -185,7 +233,6 @@ button:hover {
 }
 
 .generate-btn:after {
-  content: '🔥';
   position: absolute;
   top: 50%;
   right: 10px;
@@ -204,60 +251,87 @@ button {
   margin-top: 20px;
   text-align: left;
   transition: background 0.5s ease-in-out;
+  height: 75%;
 }
 
 body.night-mode .dream-display {
   background: rgba(0, 0, 0, 0.5);
 }
 
-.dream-text {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
+.dream-display {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.analysis-text {
-  font-size: 1.2rem;
-  font-style: italic;
+
+.dream-input, .analysis-text {
+  font-size: 1rem;
+  height: 50vh;
+  overflow-y: scroll;
   padding: 15px;
   border-left: 5px solid var(--accent-day);
   border-radius: 10px;
   box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-body.night-mode .analysis-text {
+body.night-mode .analysis-text, body.night-mode .dream-input {
   border-left: 5px solid var(--accent-night);
 }
 
 .theme-toggle-btn {
   position: absolute;
-  top: 20px;
+  top: 110px;
   right: 20px;
   background: var(--accent-day);
   color: white;
-  padding: 10px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
 
 .prompt-toggle-btn {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 180px;
+  right: 20px;
   background: var(--accent-day);
   color: white;
-  padding: 10px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px; 
+  border-radius: 50%; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition: transform 0.3s ease;
+}
+
+.logout-btn {
+  content: attr(title);
+  position: absolute;
+  bottom: 10px;
+  right: 25px;
+  background-color: var(--accent-day);
+  color: white;
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+  transition-delay: 0.3s;
 }
 
 .prompt-toggle-btn:hover::after {
   content: attr(title);
   position: absolute;
   top: 15px;
-  left: 110px;
+  right: 20px;
   transform: translateX(-50%);
   background-color: var(--accent-day);
   color: white;
@@ -285,4 +359,74 @@ body.night-mode .prompt-toggle-btn:hover::after {
 
 .theme-toggle-btn, .prompt-toggle-btn {
   font-size: 2rem;
+}
+
+.overlay {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;  
+}
+
+.spinner {
+  border: 4px solid var(--accent-day); 
+  border-top: 4px solid var(--accent-night);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px; 
+  color: var(--text-light);
+  background: var(--container-bg-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+body.night-mode .header {
+  color: var(--text-dark);
+  background: var(--container-bg-dark);
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: 'Quicksand', sans-serif;
+  text-align: center;
+}
+
+.header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text-light);
+}
+
+body.night-mode .header h3, body.night-mode .header h4 {
+  color: var(--text-dark); 
 }

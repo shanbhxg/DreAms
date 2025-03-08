@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap');
+:root {
+--bg-light: linear-gradient(to bottom, #fbd9c2, #a7a6ee);
+--bg-dark: linear-gradient(to bottom, #1d2671, #c33764);
+--text-light: #333;
+--text-dark: #fff;
+--container-bg-light: rgba(255, 255, 255, 0.8);
+--container-bg-dark: rgba(0, 0, 0, 0.4);
+--accent-day: rgba(126, 87, 133, 0.678);
+--accent-night: #000;
+--active-dream-light: #ddd;
+--active-dream-dark: #333;
+}
+
+body {
+font-family: 'Quicksand', sans-serif;
+margin: 0;
+padding: 0;
+height: 100vh;
+overflow: hidden;
+transition: background 0.5s ease-in-out;
+background: var(--bg-light);
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+body.night-mode {
+background: var(--bg-dark);
+}
+.auth-container {
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%;
+height: 100%;
+background: var(--bg-light);
+transition: background 0.5s ease-in-out;
+}
+
+.form-container {
+background: var(--container-bg-light);
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+width: 400px;
+text-align: center;
+transition: background 0.5s ease-in-out;
+}
+
+body.night-mode .form-container {
+background: var(--container-bg-dark);
+}
+
+h2 {
+margin-bottom: 20px;
+color: var(--text-light);
+}
+
+body.night-mode h2 {
+color: var(--text-dark);
+}
+
+label {
+display: block;
+text-align: left;
+margin: 10px 18px 5px;
+color: var(--text-light);
+}
+
+body.night-mode label {
+color: var(--text-dark);
+}
+
+input,
+select {
+margin-bottom: 15px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-size: 1rem;
+transition: border-color 0.3s ease;
+}
+
+input {
+    width: 22em;
+    padding: 10px 5px;
+}
+
+select {
+    width: 22.8em;    
+    padding: 10px 5px;
+}
+
+input:focus,
+select:focus {
+border-color: var(--accent-day);
+outline: none;
+}
+
+.login-button {
+width: 92%;
+padding: 15px;
+margin-top: 15px;
+background-color: var(--accent-day);
+color: var(--text-dark);
+border: none;
+border-radius: 5px;
+font-size: 1rem;
+cursor: pointer;
+transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+transform: scale(1.05);
+}
+
+.toggle-link {
+margin-top: 15px;
+color: var(--accent-day);
+cursor: pointer;
+font-size: 0.9rem;
+}
+
+.toggle-link:hover {
+text-decoration: underline;
+}
+
+.optional {
+font-size: 0.7rem;
+color: #666;
+}
+
