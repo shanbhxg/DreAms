@@ -9,7 +9,7 @@
   --container-bg-dark: rgba(0, 0, 0, 0.4);
   --accent-day: rgba(126, 87, 133, 0.678);
   --accent-night: #000;
-  --active-dream-light: #;
+  --active-dream-light: #e0c3ff;
   --active-dream-dark: #333;
 }
 
@@ -88,7 +88,7 @@ body.night-mode .username-display {
 }
 
 .sidebar {
-  width: 75%;
+  width: 30%;
   padding: 20px;
   text-align: center;
   color: var(--accent-day);
@@ -164,7 +164,8 @@ body.night-mode .main-content {
   flex-direction: column;
   align-items: center;
   margin: 10px;
-  width: 55vw;
+  width: 100%;
+  max-width: 600px;
 }
 
 .input-container button {

@@ -8,102 +8,90 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [age, setAge] = useState('');
     const [gender, setGender] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    const URL = 'https://dre-ams.vercel.app/api';
 
     const toggleForm = () => {
         setIsLogin(!isLogin);
+        setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const userAge = age || 'NA';  
-        const userGender = gender || 'NA';  
-
-        const userData = { username, age: userAge, gender: userGender };
-
-        navigate('/home', { state: userData });
+        setError('');
+        setIsLoading(true);
+    
+        if (!isLogin && (!age || !gender)) {
+            setError('Please fill in all fields');
+            setIsLoading(false);
+            return;
+        }
+    
+        try {
+            const endpoint = isLogin ? '/login' : '/signup';
+            const userData = {
+                user_name: username,
+                password
+            };
+    
+            if (!isLogin) {
+                userData.age = age || '';
+                userData.gender = gender || '';
+            }
+    
+            const response = await fetch(`${URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok && data.status.startsWith('200')) {
+                navigate('/home', {
+                    state: { username, age: age || 'NA', gender: gender || 'NA' }
+                });
+            } else {
+                setError(data.error || 'Authentication failed');
+            }
+        } catch (error) {
+            setError('Network error. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
+    
+    
 
     return (
         <div className="auth-container">
             <div className="form-container">
                 <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+                {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
-                    {isLogin ? (
+                    <label>Email:</label>
+                    <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                    <label>Password:</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    {!isLogin && (
                         <>
-                            <label htmlFor="login-username">Email:</label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                            <label htmlFor="login-password">Password:</label>
-                            <input
-                                type="password"
-                                id="login-password"
-                                name="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <label htmlFor="signup-username">Username:</label>
-                            <input
-                                type="text"
-                                id="signup-username"
-                                name="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                            />
-                            <label htmlFor="signup-password">Password:</label>
-                            <input
-                                type="password"
-                                id="signup-password"
-                                name="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <label htmlFor="signup-age" className="optionalLabels">
-                                Age: <a className="optional">(optional)</a>
-                            </label>
-                            <input
-                                type="number"
-                                id="signup-age"
-                                name="age"
-                                value={age}
-                                onChange={(e) => setAge(e.target.value)}
-                            />
-                            <label htmlFor="signup-gender" className="optionalLabels">
-                                Gender: <a className="optional">(optional)</a>
-                            </label>
-                            <select
-                                id="signup-gender"
-                                name="gender"
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}
-                            >
+                            <label>Age:</label>
+                            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} />
+                            <label>Gender:</label>
+                            <select value={gender} onChange={(e) => setGender(e.target.value)}>
                                 <option value="">Select...</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
-                                <option value="Non-binary">Other</option>
+                                <option value="Non-binary">Non-binary</option>
                             </select>
                         </>
                     )}
-                    <button className="login-button" type="submit">
-                        {isLogin ? 'Login' : 'Sign Up'}
-                    </button>
+                    <button type="submit" disabled={isLoading}>{isLoading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}</button>
                 </form>
-                <p onClick={toggleForm} className="toggle-link">
-                    {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Login'}
-                </p>
+                <p onClick={toggleForm}>{isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}</p>
             </div>
         </div>
     );

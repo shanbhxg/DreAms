@@ -16,7 +16,7 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(decoded_data)
 
             # Handle the /generate_llm_response endpoint
-            if self.path == "/generate_llm_response":
+            if self.path == "/api/generate_llm_response":
                 (
                     user_input_prompt,
                     age,
@@ -37,7 +37,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(response).encode("utf-8"))
 
-            elif self.path == "/get_user_data":
+            elif self.path == "/api/get_user_data":
                 user_name = data.get("user_name")
 
                 if not user_name:
@@ -66,7 +66,7 @@ class Handler(BaseHTTPRequestHandler):
                         json.dumps({"error": "User not found"}).encode("utf-8")
                     )
 
-            elif self.path == "/login":
+            elif self.path == "/api/login":
                 user_name = data.get("user_name")
                 password = data.get("password")
                 if not user_name or not password:
@@ -86,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(login_response).encode("utf-8"))
                 return
 
-            elif self.path == "/signup":
+            elif self.path == "/api/signup":
                 user_name = data.get("user_name")
                 password = data.get("password")
                 age = data.get("age")
@@ -123,12 +123,12 @@ class Handler(BaseHTTPRequestHandler):
 
 
 # local checks
-def run():
-    server_address = ("", 8080)
-    httpd = HTTPServer(server_address, Handler)
-    print("Starting server on http://localhost:8080")
-    httpd.serve_forever()
+# def run():
+#     server_address = ("", 8080)
+#     httpd = HTTPServer(server_address, Handler)
+#     print("Starting server on http://localhost:8080")
+#     httpd.serve_forever()
 
 
-if __name__ == "__main__":
-    run()
+# if __name__ == "__main__":
+#     run()
