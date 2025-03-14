@@ -1,110 +1,112 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Home.css';
-import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit , mdiLogout } from '@mdi/js';
+import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit, mdiLogout } from '@mdi/js';
 import Icon from '@mdi/react';
 import ReactMarkdown from 'react-markdown';
 
 function App() {
   const location = useLocation();
-  const { username, age, gender } = location.state || {}; 
-
+  const { username } = location.state || {}; 
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
   const [dreams, setDreams] = useState([]);
   const [userInput, setUserInput] = useState('');
-  const [userAge, setUserAge] = useState('');
-  const [userGender, setUserGender] = useState('');
-
   const [selectedDream, setSelectedDream] = useState(null);
   const [isNightMode, setIsNightMode] = useState(false);
   const [isDevilMode, setIsDevilMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
-
-  // if local
-  // const URL = 'http://localhost:8080';
-  const URL = 'https://dre-ams.vercel.app';
+  const URL = 'https://dre-ams.vercel.app/api'; 
 
   useEffect(() => {
-    if (isNightMode) {
-      document.body.classList.add('night-mode');
-    } else {
-      document.body.classList.remove('night-mode');
+    if (username) {
+      fetchUserData(username);
     }
-  }, [isNightMode]);
+  }, [username]);
 
-  const toggleNightMode = () => {
-    setIsNightMode((prev) => !prev);
-  };
+  const fetchUserData = async (username) => {
+    try {
+        const response = await fetch(`${URL}/get_user_data`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_name: username })
+        });
 
-  const toggleDevilMode = () => {
-    setIsDevilMode((prev) => !prev);
-  };
+        if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+        }
+
+        const userData = await response.json();
+        setAge(userData.age || 'NA');
+        setGender(userData.gender || 'NA');
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+};
 
   const handleAddDream = async () => {
     if (userInput.trim() === '') return;
-    setIsLoading(true); 
-    try {
+    setIsLoading(true);
 
-      const response = await fetch(URL + '/api/generate_llm_response', {        
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          "user_input": {
-            "prompt": userInput,
-            "age": userAge,
-            "gender": userGender,
-            "isDevilMode": isDevilMode
-          }
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch analysis');
-      }
-  
-      const analysis = await response.json(); 
-      const analysis_array = analysis['output'];
-      const newDream = {
-        date: new Date().toLocaleDateString(),
-        dream: userInput,
-        analysis: analysis_array.join('\n'),
-      };
-  
-      setDreams([newDream, ...dreams]);
-      setSelectedDream(newDream);
-      setUserInput('');
+    try {
+        const response = await fetch(`${URL}/generate_llm_response`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_input: {
+                    prompt: userInput,
+                    age: age || 'Unknown',
+                    gender: gender || 'Undefined',
+                    isDevilMode: isDevilMode,
+                    user_name: username
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch analysis');
+        }
+
+        const analysis = await response.json();
+        const analysis_array = Array.isArray(analysis.output) ? analysis.output : [];
+
+        const newDream = {
+            date: new Date().toLocaleDateString(),
+            dream: userInput,
+            analysis: analysis_array.join('\n')
+        };
+
+        setDreams([newDream, ...dreams]);
+        setSelectedDream(newDream);
+        setUserInput('');
     } catch (error) {
-      console.error('Error fetching analysis:', error);
+        console.error('Error fetching analysis:', error);
     } finally {
-      setIsLoading(false); 
+        setIsLoading(false);
     }
   };
+
 
   return (
     <div>
       <div className="header">
-        <h3>Welcome, <span class="username-display">{username}</span> </h3>
-        <h4>{age != 'NA' ? 'Age: '+age : ''} {gender != 'NA' ? 'Gender: '+gender : ''}</h4>
+        <h3>Welcome, <span className="username-display">{username}</span></h3>
+        <h4>{age !== 'NA' ? `Age: ${age}` : ''} {gender !== 'NA' ? `Gender: ${gender}` : ''}</h4>
       </div>
-      <button className="theme-toggle-btn" onClick={toggleNightMode}>
+
+      <button className="theme-toggle-btn" onClick={() => setIsNightMode(!isNightMode)}>
         {isNightMode ? '☀️' : '🌙'}
       </button>
-      
-      <button
-        className="prompt-toggle-btn"
-        onClick={toggleDevilMode}
-        title={isDevilMode ? "Devil Mode" : "Angel Mode"}
-      >
+
+      <button className="prompt-toggle-btn" onClick={() => setIsDevilMode(!isDevilMode)}>
         <Icon path={isDevilMode ? mdiRobotAngry : mdiRobotHappy} size={1.5} />
       </button>
 
       <button className="logout-btn" onClick={() => window.location.href = '/'}>
-      <Icon path={mdiLogout} size={1.3} />
+        <Icon path={mdiLogout} size={1.3} />
       </button>
 
-      
       {isLoading && (
         <div className="overlay">
           <div className="spinner"></div>
