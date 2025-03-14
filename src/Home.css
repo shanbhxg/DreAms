@@ -90,6 +90,7 @@ body.night-mode .username-display {
 .sidebar {
   width: 30%;
   padding: 20px;
+  overflow-y: scroll;
   text-align: center;
   color: var(--accent-day);
   background: rgba(255, 255, 255, 0.6);

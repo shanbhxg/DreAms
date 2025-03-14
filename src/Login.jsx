@@ -72,7 +72,7 @@ const Login = () => {
                 <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
-                    <label>Email:</label>
+                    <label>Username:</label>
                     <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     <label>Password:</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />

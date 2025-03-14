@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 
 function App() {
   const location = useLocation();
-  const { username } = location.state || {}; 
+  const { username } = location.state || {};
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [dreams, setDreams] = useState([]);
@@ -17,7 +17,7 @@ function App() {
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const URL = 'https://dre-ams.vercel.app/api'; 
+  const URL = 'https://dre-ams.vercel.app/api';
 
   useEffect(() => {
     if (username) {
@@ -27,66 +27,85 @@ function App() {
 
   const fetchUserData = async (username) => {
     try {
-        const response = await fetch(`${URL}/get_user_data`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_name: username })
+      const response = await fetch(`${URL}/get_user_data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name: username })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+      
+      setAge(userData.Age || 'NA');
+      setGender(userData.Gender || 'NA');
+
+      const processedDreams = [];
+
+      if (userData.Dreams) {
+        Object.entries(userData.Dreams).forEach(([dreamText, dreamEntries]) => {
+          dreamEntries.forEach((entry) => {
+            processedDreams.push({
+              date: entry.date,
+              dream: dreamText,
+              analysis: Array.isArray(entry.llm_response) 
+                ? entry.llm_response.join('\n') 
+                : entry.llm_response
+            });
+          });
         });
+      }
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-
-        const userData = await response.json();
-        setAge(userData.age || 'NA');
-        setGender(userData.gender || 'NA');
+      processedDreams.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setDreams(processedDreams);
     } catch (error) {
-        console.error('Error fetching user data:', error);
+      console.error('Error fetching user data:', error);
     }
-};
+  };
 
   const handleAddDream = async () => {
     if (userInput.trim() === '') return;
     setIsLoading(true);
 
     try {
-        const response = await fetch(`${URL}/generate_llm_response`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_input: {
-                    prompt: userInput,
-                    age: age || 'Unknown',
-                    gender: gender || 'Undefined',
-                    isDevilMode: isDevilMode,
-                    user_name: username
-                }
-            })
-        });
+      const response = await fetch(`${URL}/generate_llm_response`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: {
+            prompt: userInput,
+            age: age || 'Unknown',
+            gender: gender || 'Undefined',
+            isDevilMode: isDevilMode,
+            user_name: username
+          }
+        })
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch analysis');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to fetch analysis');
+      }
 
-        const analysis = await response.json();
-        const analysis_array = Array.isArray(analysis.output) ? analysis.output : [];
+      const analysis = await response.json();
+      const analysis_array = Array.isArray(analysis.output) ? analysis.output : [];
 
-        const newDream = {
-            date: new Date().toLocaleDateString(),
-            dream: userInput,
-            analysis: analysis_array.join('\n')
-        };
+      const newDream = {
+        date: new Date().toLocaleDateString(),
+        dream: userInput,
+        analysis: analysis_array.join('\n')
+      };
 
-        setDreams([newDream, ...dreams]);
-        setSelectedDream(newDream);
-        setUserInput('');
+      setDreams([newDream, ...dreams]);
+      setSelectedDream(newDream);
+      setUserInput('');
     } catch (error) {
-        console.error('Error fetching analysis:', error);
+      console.error('Error fetching analysis:', error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
-
 
   return (
     <div>
@@ -157,9 +176,9 @@ function App() {
               <div className="dream-input">
                 <p className="dream-text"> 
                   <b>{selectedDream.date}</b> 
-                    <br/>
-                    {selectedDream.dream}
-                  </p>
+                  <br/>
+                  {selectedDream.dream}
+                </p>
               </div>
               <div className="analysis-text">
                 <ReactMarkdown>{selectedDream.analysis}</ReactMarkdown>
