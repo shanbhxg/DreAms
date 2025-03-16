@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
@@ -11,8 +11,20 @@ const Login = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [isNightMode, setIsNightMode] = useState(() => {
+        const savedMode = localStorage.getItem('isNightMode');
+        return savedMode === 'true'; 
+    });
 
     const URL = 'https://dre-ams.vercel.app/api';
+    useEffect(() => {
+        if (isNightMode) {
+        document.body.classList.add('night-mode');
+        } else {
+        document.body.classList.remove('night-mode');
+        }
+        localStorage.setItem('isNightMode', isNightMode);
+    }, [isNightMode]);
 
     const toggleForm = () => {
         setIsLogin(!isLogin);
@@ -42,6 +54,7 @@ const Login = () => {
             const data = await response.json();
     
             if (response.ok && data.status.startsWith('200')) {
+                localStorage.setItem('username', username);
                 navigate('/home', {
                     state: { username, age: age || 'NA', gender: gender || 'NA' }
                 });
@@ -60,8 +73,7 @@ const Login = () => {
     
 
     return (
-        <div className="auth-container">
-            <div className="form-container">
+        <div className="form-container">
                 <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
@@ -84,8 +96,7 @@ const Login = () => {
                     )}
                     <button type="submit" disabled={isLoading}>{isLoading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}</button>
                 </form>
-                <p onClick={toggleForm}>{isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}</p>
-            </div>
+                <a onClick={toggleForm}>{isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}</a>
         </div>
     );
 };

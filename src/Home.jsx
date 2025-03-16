@@ -13,7 +13,13 @@ function App() {
   const [dreams, setDreams] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [selectedDream, setSelectedDream] = useState(null);
-  const [isNightMode, setIsNightMode] = useState(false);
+  const buttons_with_devil = document.getElementsByClassName('can-be-devil');
+
+  const [isNightMode, setIsNightMode] = useState(() => {
+    const savedMode = localStorage.getItem('isNightMode');
+    return savedMode === 'true';
+  });
+  
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -32,7 +38,21 @@ function App() {
     } else {
       document.body.classList.remove('night-mode');
     }
+    localStorage.setItem('isNightMode', isNightMode);
   }, [isNightMode]);
+
+  useEffect(() => {
+
+    if (isDevilMode) {
+      for (let i = 0; i < buttons_with_devil.length; i++) {
+        buttons_with_devil[i].classList.add('devil-mode');
+      }
+    } else {
+      for (let i = 0; i < buttons_with_devil.length; i++) {
+        buttons_with_devil[i].classList.remove('devil-mode');
+      }
+    }
+  }, [isDevilMode]);
 
   const fetchUserData = async (username) => {
     try {
@@ -156,7 +176,7 @@ function App() {
       </button>
 
 
-      <button className="prompt-toggle-btn btn" onClick={() => setIsDevilMode(!isDevilMode)}>
+      <button className="prompt-toggle-btn btn can-be-devil" onClick={() => setIsDevilMode(!isDevilMode)}>
         <Icon path={isDevilMode ? mdiRobotAngry : mdiRobotHappy} size={1.5} />
       </button>
 
@@ -188,7 +208,7 @@ function App() {
                 className={`history-card ${selectedDream === d ? 'active' : ''}`}
                 onClick={() => setSelectedDream(d)}
               >
-                <button onClick={() => handleDeleteDream(selectedDream.dream)}>
+                <button class="delete-dream-btn" onClick={() => handleDeleteDream(selectedDream.dream)}>
                   <Icon path={mdiTrashCan} size={1} />
                 </button>
                 <strong>{d.date}</strong>
@@ -199,17 +219,19 @@ function App() {
         </aside>
 
         <main className="main-content">
-        <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
           {!selectedDream ? (
-            <div className="input-container">
-              <textarea
-                placeholder={isDevilMode ? "Why even bother dreaming?" : "What did you dream about?"}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-              />
-              <button className="generate-btn" onClick={handleAddDream}>
-                {isDevilMode ? 'Generate Mean Analysis' : 'Generate Analysis'}
-              </button>
+            <div className="new-dream-container">
+              <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
+              <div className="input-container">
+                <textarea
+                  placeholder={isDevilMode ? "Why even bother dreaming?" : "What did you dream about?"}
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                />
+                <button className="generate-btn can-be-devil" onClick={handleAddDream}>
+                  {isDevilMode ? 'Generate Mean Analysis' : 'Generate Analysis'}
+                </button>
+              </div>
             </div>
           ) : null}
 
