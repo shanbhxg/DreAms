@@ -15,7 +15,6 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = json.loads(decoded_data)
 
-            # Handle the /generate_llm_response endpoint
             if self.path == "/api/generate_llm_response":
                 (
                     user_input_prompt,
@@ -32,6 +31,26 @@ class Handler(BaseHTTPRequestHandler):
                 print("response from api.py", type(response))
 
                 # Send the response
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(response).encode("utf-8"))
+
+            elif self.path == "/api/delete_dream":
+                user_name = data.get("user_name")
+                dream_text = data.get("dream_text")
+
+                if not user_name or not dream_text:
+                    self.send_response(400)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(
+                        json.dumps({"error": "Missing 'user_name' or 'dream_text'"}).encode("utf-8")
+                    )
+                    return
+
+                response = firebase_obj.delete_dream(user_name, dream_text)
+
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.end_headers()

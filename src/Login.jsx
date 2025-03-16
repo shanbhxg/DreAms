@@ -24,23 +24,14 @@ const Login = () => {
         setError('');
         setIsLoading(true);
     
-        if (!isLogin && (!age || !gender)) {
-            setError('Please fill in all fields');
-            setIsLoading(false);
-            return;
-        }
-    
         try {
             const endpoint = isLogin ? '/login' : '/signup';
             const userData = {
                 user_name: username,
-                password
+                password,
+                age: age || null,
+                gender: gender || null
             };
-    
-            if (!isLogin) {
-                userData.age = age || '';
-                userData.gender = gender || '';
-            }
     
             const response = await fetch(`${URL}${endpoint}`, {
                 method: 'POST',
@@ -55,7 +46,9 @@ const Login = () => {
                     state: { username, age: age || 'NA', gender: gender || 'NA' }
                 });
             } else {
-                setError(data.error || 'Authentication failed');
+                if (data.status.startsWith('4')) {
+                    setError(data.message);
+                }
             }
         } catch (error) {
             setError('Network error. Please try again.');
@@ -72,7 +65,7 @@ const Login = () => {
                 <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
-                    <label>Email:</label>
+                    <label>Username:</label>
                     <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     <label>Password:</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />

@@ -68,6 +68,14 @@ class FirebaseDB:
             print(f"No data found for user: {user_name}")
             return {}
 
+    def delete_dream(self, user_name, dream_text):
+        user_ref = self.ref.child(user_name).child("Dreams").child(dream_text)
+        if user_ref.get():
+            user_ref.delete()
+            return {"status": "200 - Dream deleted successfully"}
+        else:
+            return {"status": "404 - Dream not found"}
+
     def login(self, user_name, password):
         try:
             user_ref = self.ref.child(user_name).get()

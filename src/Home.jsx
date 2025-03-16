@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Home.css';
-import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit, mdiLogout } from '@mdi/js';
+import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit, mdiLogout, mdiTrashCan } from '@mdi/js';
 import Icon from '@mdi/react';
 import ReactMarkdown from 'react-markdown';
 
 function App() {
   const location = useLocation();
-  const { username } = location.state || {}; 
+  const { username } = location.state || {};
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [dreams, setDreams] = useState([]);
@@ -16,8 +16,9 @@ function App() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const URL = 'https://dre-ams.vercel.app/api'; 
+  const URL = 'https://dre-ams.vercel.app/api';
 
   useEffect(() => {
     if (username) {
@@ -25,85 +26,141 @@ function App() {
     }
   }, [username]);
 
+  useEffect(() => {
+    if (isNightMode) {
+      document.body.classList.add('night-mode');
+    } else {
+      document.body.classList.remove('night-mode');
+    }
+  }, [isNightMode]);
+
   const fetchUserData = async (username) => {
     try {
-        const response = await fetch(`${URL}/get_user_data`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_name: username })
+      const response = await fetch(`${URL}/get_user_data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name: username })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+
+      const processedDreams = [];
+
+      if (userData.Dreams) {
+        Object.entries(userData.Dreams).forEach(([dreamText, dreamEntries]) => {
+          dreamEntries.forEach((entry) => {
+            processedDreams.push({
+              date: entry.date,
+              dream: dreamText,
+              analysis: Array.isArray(entry.llm_response) 
+                ? entry.llm_response.join('\n') 
+                : entry.llm_response
+            });
+          });
         });
+      }
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-
-        const userData = await response.json();
-        setAge(userData.age || 'NA');
-        setGender(userData.gender || 'NA');
+      processedDreams.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setDreams(processedDreams);
     } catch (error) {
-        console.error('Error fetching user data:', error);
+      console.error('Error fetching user data:', error);
     }
-};
+  };
+
+  const handleDeleteDream = async (dreamText) => {
+    try {
+      const response = await fetch(`${URL}/delete_dream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name: username, dream_text: dreamText }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        setDreams(dreams.filter(d => !(d.dream === dreamText)));
+        setSelectedDream(null);
+      } else {
+        console.error('Error deleting dream:', result);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const handleAddDream = async () => {
     if (userInput.trim() === '') return;
     setIsLoading(true);
 
     try {
-        const response = await fetch(`${URL}/generate_llm_response`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_input: {
-                    prompt: userInput,
-                    age: age || 'Unknown',
-                    gender: gender || 'Undefined',
-                    isDevilMode: isDevilMode,
-                    user_name: username
-                }
-            })
-        });
+      const response = await fetch(`${URL}/generate_llm_response`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: {
+            prompt: userInput,
+            age: age || 'Unknown',
+            gender: gender || 'Undefined',
+            isDevilMode: isDevilMode,
+            user_name: username
+          }
+        })
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch analysis');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to fetch analysis');
+      }
 
-        const analysis = await response.json();
-        const analysis_array = Array.isArray(analysis.output) ? analysis.output : [];
+      const analysis = await response.json();
+      const analysis_array = Array.isArray(analysis.output) ? analysis.output : [];
 
-        const newDream = {
-            date: new Date().toLocaleDateString(),
-            dream: userInput,
-            analysis: analysis_array.join('\n')
-        };
+      const newDream = {
+        date: new Date().toLocaleDateString(),
+        dream: userInput,
+        analysis: analysis_array.join('\n')
+      };
 
-        setDreams([newDream, ...dreams]);
-        setSelectedDream(newDream);
-        setUserInput('');
+      setDreams([newDream, ...dreams]);
+      setSelectedDream(newDream);
+      setUserInput('');
     } catch (error) {
-        console.error('Error fetching analysis:', error);
+      console.error('Error fetching analysis:', error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
-
-
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   return (
     <div>
       <div className="header">
         <h3>Welcome, <span className="username-display">{username}</span></h3>
-        <h4>{age !== 'NA' ? `Age: ${age}` : ''} {gender !== 'NA' ? `Gender: ${gender}` : ''}</h4>
+      </div>
+      <div 
+        className={`hamburger-menu ${isSidebarOpen ? 'active' : ''}`} 
+        onClick={toggleSidebar}
+      >
+        <div className="hamburger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
-      <button className="theme-toggle-btn" onClick={() => setIsNightMode(!isNightMode)}>
+      <button className="theme-toggle-btn btn" onClick={() => setIsNightMode(prev => !prev)}>
         {isNightMode ? '☀️' : '🌙'}
       </button>
 
-      <button className="prompt-toggle-btn" onClick={() => setIsDevilMode(!isDevilMode)}>
+
+      <button className="prompt-toggle-btn btn" onClick={() => setIsDevilMode(!isDevilMode)}>
         <Icon path={isDevilMode ? mdiRobotAngry : mdiRobotHappy} size={1.5} />
       </button>
 
-      <button className="logout-btn" onClick={() => window.location.href = '/'}>
+      <button className="logout-btn btn" onClick={() => window.location.href = '/'}>
         <Icon path={mdiLogout} size={1.3} />
       </button>
 
@@ -113,9 +170,15 @@ function App() {
         </div>
       )}
 
+      {selectedDream && (
+        <button className="new-dream-btn" onClick={() => setSelectedDream(null)}>
+          <Icon path={mdiNotebookEdit} size={1.5} />
+        </button>
+      )}
+
       <div className="app-container">
-        <aside className="sidebar">
-          <h2>Dream History</h2>
+      <aside className={`sidebar ${isSidebarOpen ? 'active' : ''}`}>
+        <h2>Dream History</h2>
           {dreams.length === 0 ? (
             <p>No dreams yet...</p>
           ) : (
@@ -125,6 +188,9 @@ function App() {
                 className={`history-card ${selectedDream === d ? 'active' : ''}`}
                 onClick={() => setSelectedDream(d)}
               >
+                <button onClick={() => handleDeleteDream(selectedDream.dream)}>
+                  <Icon path={mdiTrashCan} size={1} />
+                </button>
                 <strong>{d.date}</strong>
                 <p>{d.dream.length > 30 ? d.dream.slice(0, 30) + '...' : d.dream}</p>
               </div>
@@ -133,8 +199,7 @@ function App() {
         </aside>
 
         <main className="main-content">
-          <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
-
+        <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
           {!selectedDream ? (
             <div className="input-container">
               <textarea
@@ -146,20 +211,17 @@ function App() {
                 {isDevilMode ? 'Generate Mean Analysis' : 'Generate Analysis'}
               </button>
             </div>
-          ) : (
-            <button className="new-dream-btn" onClick={() => setSelectedDream(null)}>
-              <Icon path={mdiNotebookEdit} size={1} />
-            </button>
-          )}
+          ) : null}
+
 
           {selectedDream && (
             <div className="dream-display">
               <div className="dream-input">
                 <p className="dream-text"> 
                   <b>{selectedDream.date}</b> 
-                    <br/>
-                    {selectedDream.dream}
-                  </p>
+                  <br/>
+                  {selectedDream.dream}
+                </p>
               </div>
               <div className="analysis-text">
                 <ReactMarkdown>{selectedDream.analysis}</ReactMarkdown>
