@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Home.css';
-import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit, mdiLogout } from '@mdi/js';
+import { mdiRobotAngry, mdiRobotHappy, mdiNotebookEdit, mdiLogout, mdiTrashCan } from '@mdi/js';
 import Icon from '@mdi/react';
 import ReactMarkdown from 'react-markdown';
 
@@ -16,6 +16,7 @@ function App() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [isDevilMode, setIsDevilMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const URL = 'https://dre-ams.vercel.app/api';
 
@@ -24,6 +25,14 @@ function App() {
       fetchUserData(username);
     }
   }, [username]);
+
+  useEffect(() => {
+    if (isNightMode) {
+      document.body.classList.add('night-mode');
+    } else {
+      document.body.classList.remove('night-mode');
+    }
+  }, [isNightMode]);
 
   const fetchUserData = async (username) => {
     try {
@@ -38,9 +47,6 @@ function App() {
       }
 
       const userData = await response.json();
-      
-      setAge(userData.Age || 'NA');
-      setGender(userData.Gender || 'NA');
 
       const processedDreams = [];
 
@@ -62,6 +68,26 @@ function App() {
       setDreams(processedDreams);
     } catch (error) {
       console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleDeleteDream = async (dreamText) => {
+    try {
+      const response = await fetch(`${URL}/delete_dream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name: username, dream_text: dreamText }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        setDreams(dreams.filter(d => !(d.dream === dreamText)));
+        setSelectedDream(null);
+      } else {
+        console.error('Error deleting dream:', result);
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -106,23 +132,35 @@ function App() {
       setIsLoading(false);
     }
   };
-
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   return (
     <div>
       <div className="header">
         <h3>Welcome, <span className="username-display">{username}</span></h3>
-        <h4>{age !== 'NA' ? `Age: ${age}` : ''} {gender !== 'NA' ? `Gender: ${gender}` : ''}</h4>
+      </div>
+      <div 
+        className={`hamburger-menu ${isSidebarOpen ? 'active' : ''}`} 
+        onClick={toggleSidebar}
+      >
+        <div className="hamburger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
-      <button className="theme-toggle-btn" onClick={() => setIsNightMode(!isNightMode)}>
+      <button className="theme-toggle-btn btn" onClick={() => setIsNightMode(prev => !prev)}>
         {isNightMode ? '☀️' : '🌙'}
       </button>
 
-      <button className="prompt-toggle-btn" onClick={() => setIsDevilMode(!isDevilMode)}>
+
+      <button className="prompt-toggle-btn btn" onClick={() => setIsDevilMode(!isDevilMode)}>
         <Icon path={isDevilMode ? mdiRobotAngry : mdiRobotHappy} size={1.5} />
       </button>
 
-      <button className="logout-btn" onClick={() => window.location.href = '/'}>
+      <button className="logout-btn btn" onClick={() => window.location.href = '/'}>
         <Icon path={mdiLogout} size={1.3} />
       </button>
 
@@ -132,9 +170,15 @@ function App() {
         </div>
       )}
 
+      {selectedDream && (
+        <button className="new-dream-btn" onClick={() => setSelectedDream(null)}>
+          <Icon path={mdiNotebookEdit} size={1.5} />
+        </button>
+      )}
+
       <div className="app-container">
-        <aside className="sidebar">
-          <h2>Dream History</h2>
+      <aside className={`sidebar ${isSidebarOpen ? 'active' : ''}`}>
+        <h2>Dream History</h2>
           {dreams.length === 0 ? (
             <p>No dreams yet...</p>
           ) : (
@@ -144,6 +188,9 @@ function App() {
                 className={`history-card ${selectedDream === d ? 'active' : ''}`}
                 onClick={() => setSelectedDream(d)}
               >
+                <button onClick={() => handleDeleteDream(selectedDream.dream)}>
+                  <Icon path={mdiTrashCan} size={1} />
+                </button>
                 <strong>{d.date}</strong>
                 <p>{d.dream.length > 30 ? d.dream.slice(0, 30) + '...' : d.dream}</p>
               </div>
@@ -152,8 +199,7 @@ function App() {
         </aside>
 
         <main className="main-content">
-          <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
-
+        <h1 className="user-welcome">Welcome to Your Dream Journal ✨</h1>
           {!selectedDream ? (
             <div className="input-container">
               <textarea
@@ -165,11 +211,8 @@ function App() {
                 {isDevilMode ? 'Generate Mean Analysis' : 'Generate Analysis'}
               </button>
             </div>
-          ) : (
-            <button className="new-dream-btn" onClick={() => setSelectedDream(null)}>
-              <Icon path={mdiNotebookEdit} size={1} />
-            </button>
-          )}
+          ) : null}
+
 
           {selectedDream && (
             <div className="dream-display">

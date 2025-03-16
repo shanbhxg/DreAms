@@ -9,7 +9,7 @@
   --container-bg-dark: rgba(0, 0, 0, 0.4);
   --accent-day: rgba(126, 87, 133, 0.678);
   --accent-night: #000;
-  --active-dream-light: #e0c3ff;
+  --active-dream-light: #;
   --active-dream-dark: #333;
 }
 
@@ -48,7 +48,8 @@ body.night-mode::after {
 }
 
 .app-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto;
   width: 90vw;
   height: 80vh;
   margin-top: 100px;
@@ -88,7 +89,6 @@ body.night-mode .username-display {
 }
 
 .sidebar {
-  width: 30%;
   padding: 20px;
   overflow-y: scroll;
   text-align: center;
@@ -165,8 +165,7 @@ body.night-mode .main-content {
   flex-direction: column;
   align-items: center;
   margin: 10px;
-  width: 100%;
-  max-width: 600px;
+  width: 55vw;
 }
 
 .input-container button {
@@ -178,17 +177,17 @@ body.night-mode .main-content {
 
 .new-dream-btn {
   position: absolute;
-  top: 7vh;
-  left: 32%;
-  background: var(--accent-day);
+  bottom: 80px;
+  right: 25px;
+  background-color: var(--accent-day);
   color: white;
-  border-radius: 50%;
-  padding: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.3s ease;
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  white-space: nowrap;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+  transition-delay: 0.3s;
 }
 
 textarea {
