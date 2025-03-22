@@ -36,25 +36,39 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(response).encode("utf-8"))
 
-            elif self.path == "/api/delete_dream":
-                user_name = data.get("user_name")
-                dream_text = data.get("dream_text")
+            elif self.path == "/delete_dream":
+                try:
+                    user_name = data.get("user_name")
+                    dream_text = data.get("dream_text")
 
-                if not user_name or not dream_text:
-                    self.send_response(400)
+                    if not user_name or not dream_text:
+                        self.send_response(400)
+                        self.send_header("Content-type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(
+                            json.dumps({"error": "Missing 'user_name' or 'dream_text'"}).encode("utf-8")
+                        )
+                        return
+
+                    response = firebase_obj.delete_dream(user_name, dream_text)
+
+                    if "404" in response["status"]:
+                        self.send_response(404)
+                    elif "200" in response["status"]:
+                        self.send_response(200)
+                    else:
+                        self.send_response(500)
+
                     self.send_header("Content-type", "application/json")
                     self.end_headers()
-                    self.wfile.write(
-                        json.dumps({"error": "Missing 'user_name' or 'dream_text'"}).encode("utf-8")
-                    )
-                    return
+                    self.wfile.write(json.dumps(response).encode("utf-8"))
 
-                response = firebase_obj.delete_dream(user_name, dream_text)
-
-                self.send_response(200)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps(response).encode("utf-8"))
+                except Exception as e:
+                    print(f"Error in delete_dream route: {str(e)}")
+                    self.send_response(500)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "500 - Internal Server Error"}).encode("utf-8"))
 
             elif self.path == "/api/get_user_data":
                 user_name = data.get("user_name")
