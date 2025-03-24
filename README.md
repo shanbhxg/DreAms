@@ -25,7 +25,7 @@ What all is used?
 * AI used to generate the response is **Gemini**
 * Database used is **Firebase**
 
-### Details of frontend
+### Details of backend
 
 #### api.py
 
