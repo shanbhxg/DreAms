@@ -8,41 +8,63 @@ from firebase_admin import credentials, db
 
 load_dotenv()
 
+def sanitize_firebase_key(key: str) -> str:
+    """
+    Replace Firebase illegal characters and newline characters in a key with an underscore.
+    Firebase keys cannot contain: $ # [ ] / or .
+    Also, remove or replace newline characters to avoid parsing issues.
+    """
+    illegal_chars = ['$', '#', '[', ']', '/', '.']
+    for char in illegal_chars:
+        key = key.replace(char, '_')
+    # Replace newline and carriage return characters
+    key = key.replace('\n', '_').replace('\r', '_')
+    return key
+
+
 
 class FirebaseDB:
     def __init__(self):
-        if not firebase_admin._apps:
-            firebase_creds_str = os.environ.get("FIREBASE_CREDENTIALS")
-            firebase_db_url = os.environ.get("FIREBASE_DATABASE_URL")
+        try:
+            if not firebase_admin._apps:
+                firebase_creds_str = os.environ.get("FIREBASE_CREDENTIALS")
+                firebase_db_url = os.environ.get("FIREBASE_DATABASE_URL")
 
-            if not firebase_creds_str or not firebase_db_url:
-                raise ValueError(
-                    "Missing Firebase credentials or database URL in environment variables."
-                )
+                if not firebase_creds_str or not firebase_db_url:
+                    raise ValueError(
+                        "Missing Firebase credentials or database URL in environment variables."
+                    )
 
-            firebase_creds_dict = json.loads(firebase_creds_str)
-            cred = credentials.Certificate(firebase_creds_dict)
+                firebase_creds_dict = json.loads(firebase_creds_str)
+                cred = credentials.Certificate(firebase_creds_dict)
 
-            firebase_admin.initialize_app(cred, {"databaseURL": firebase_db_url})
+                firebase_admin.initialize_app(cred, {"databaseURL": firebase_db_url})
 
-        self.ref = db.reference("/users")
+            self.ref = db.reference("/users")
+        except Exception as e:
+            print(f"[ERROR] Firebase initialization failed: {e}")
+            raise
 
     def update_user_data(self, current_data, user_input, llm_response, gender, age):
         current_date = datetime.utcnow().date().isoformat()
+        # Sanitize user_input to be used as a Firebase key.
+        safe_user_input = sanitize_firebase_key(user_input)
         if current_data:
             dreams = current_data.setdefault("Dreams", {})
-            if user_input in dreams:
-                dreams[user_input].append(
+            if safe_user_input in dreams:
+                dreams[safe_user_input].append(
                     {"llm_response": llm_response, "date": current_date}
                 )
             else:
-                dreams[user_input] = [
+                dreams[safe_user_input] = [
                     {"llm_response": llm_response, "date": current_date}
                 ]
         else:
             current_data = {
                 "Dreams": {
-                    user_input: [{"llm_response": llm_response, "date": current_date}]
+                    safe_user_input: [
+                        {"llm_response": llm_response, "date": current_date}
+                    ]
                 },
                 "Gender": gender,
                 "Age": age,
@@ -50,31 +72,31 @@ class FirebaseDB:
         return current_data
 
     def add_data_to_firebase(self, user_name, user_input, gender, age, llm_response):
-        user_ref = self.ref.child(user_name)
-        # Use transaction for atomic updates
-        user_ref.transaction(
-            lambda current_data: self.update_user_data(
-                current_data, user_input, llm_response, gender, age
+        try:
+            user_ref = self.ref.child(user_name)
+            # Use transaction for atomic updates
+            user_ref.transaction(
+                lambda current_data: self.update_user_data(
+                    current_data, user_input, llm_response, gender, age
+                )
             )
-        )
-        print(f"Data updated for user: {user_name}")
+            print(f"Data updated for user: {user_name}")
+        except Exception as e:
+            print(f"[ERROR] Failed to save data to Firebase: {e}")
+            raise
 
     def get_user_data(self, user_name):
-        user_data = self.ref.child(user_name).get()
-        if user_data:
-            print(f"Data found for user: {user_name}")
-            return user_data
-        else:
-            print(f"No data found for user: {user_name}")
-            return {}
-
-    def delete_dream(self, user_name, dream_text):
-        user_ref = self.ref.child(user_name).child("Dreams").child(dream_text)
-        if user_ref.get():
-            user_ref.delete()
-            return {"status": "200 - Dream deleted successfully"}
-        else:
-            return {"status": "404 - Dream not found"}
+        try:
+            user_data = self.ref.child(user_name).get()
+            if user_data:
+                print(f"Data found for user: {user_name}")
+                return user_data
+            else:
+                print(f"No data found for user: {user_name}")
+                return {}
+        except Exception as e:
+            print(f"[ERROR] Failed to retrieve data for user {user_name}: {e}")
+            raise
 
     def login(self, user_name, password):
         try:
@@ -88,7 +110,6 @@ class FirebaseDB:
                 return {"status": "404 - Password does not match the username"}
 
             return {"status": "200 - OK"}
-
         except Exception as e:
             print(f"Error during login: {str(e)}")
             return {"status": "404 - Error"}
@@ -109,7 +130,26 @@ class FirebaseDB:
             self.ref.child(user_name).set(new_user_data)
 
             return {"status": "200 - OK"}
-
         except Exception as e:
             print(f"Error during signup: {str(e)}")
+            return {"status": "404 - Error"}
+
+    def delete_dream(self, user_name, dream_text):
+        try:
+            user_ref = self.ref.child(user_name).child("Dreams")
+            dreams = user_ref.get()
+
+            if not dreams:
+                return {"status": "404 - No dreams found for user"}
+
+            updated_dreams = [dream for dream in dreams if dream_text not in dream]
+
+            if len(updated_dreams) == len(dreams):  # If no dream was deleted
+                return {"status": "404 - Dream not found"}
+
+            user_ref.set(updated_dreams)
+
+            return {"status": "200 - Dream deleted successfully"}
+        except Exception as e:
+            print(f"Error deleting dream: {str(e)}")
             return {"status": "404 - Error"}
