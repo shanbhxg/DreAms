@@ -8,14 +8,32 @@ This code is for a website that analyses your dreams and predicts what they coul
 * What could be your 16Personalities type?
 * Steps to get better
 
-The link is: https://somnai.vercel.app/
+Live URL: https://somnai.vercel.app/
 
 There is a *nice* mode and a *mean* mode. In the nice mode, the LLM responds as a really nice friend who genuinely cares about you. 
 But in the mean mode, you can get a sarcastic, but realistic response from the LLM, similar to what a best friend might give you 🙃.  
 
 ## Tech Stack for frontend 
+* Vite for creating app
+* Material Design for icons
+* ReactJS (mainly two pages, Home.jsx and Login.jsx)
+* ReactRouter for navigation
+* React Markdown (react-markdown) for rendering LLM output
 
-// to do by Deepti
+### Details of frontend
+
+#### login.jsx
+Renders form for signup/login, and sends POST requests to /login or /signup
+On success, it will redirect to the homepage using useNavigate and passes user data via route state.
+
+#### home.jsx
+This is the main page where you can see user's dream history, create a new dream analysis, change modes etc.
+* Fetch user data (/get_user_data)
+* Display dream history in sidebar
+* Add new dream (/generate_llm_response)
+* Delete dream (/delete_dream)
+* Render the LLM response using react-markdown
+* Loading overlay for async operations
 
 ## Tech stack for backend
 
@@ -49,5 +67,9 @@ In Firebase, the type of db used is **Realtime Database**.
 
 Gemini is the LLM used. 
 Model used is: **gemini-1.5-flash**
+
+#### Deployment
+
+Deployed via Vercel (serverless) 
 
 Rest of the code is pretty self-explanatory. Efforts have been put to capture all exception scenarios and give accurate output wherever possible.
